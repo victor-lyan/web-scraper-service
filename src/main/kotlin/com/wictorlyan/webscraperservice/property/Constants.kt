@@ -1,0 +1,21 @@
+package com.wictorlyan.webscraperservice.property
+
+const val TABLE_AFISHA_CINEMA = "afisha_cinemas"
+const val TABLE_AFISHA_MOVIE = "afisha_movies"
+const val TABLE_AFISHA_CINEMA_MOVIE = "afisha_cinemas_movies"
+
+const val COLUMN_ID = "id"
+const val COLUMN_NAME = "name"
+const val COLUMN_LINK_AFISHA = "link_afisha"
+const val COLUMN_LINK_ABOUT = "link_about"
+const val COLUMN_CREATED_DATE = "created_date"
+const val COLUMN_MODIFIED_DATE = "modified_date"
+const val COLUMN_GENRE = "genre"
+const val COLUMN_LINK = "link"
+const val COLUMN_CINEMA_ID = "cinema_id"
+const val COLUMN_CINEMA_NAME = "cinema_name"
+const val COLUMN_MOVIE_ID = "movie_id"
+const val COLUMN_MOVIE_NAME = "movie_name"
+const val COLUMN_MOVIE_DATE = "movie_date"
+const val COLUMN_MOVIE_TIME = "movie_time"
+const val COLUMN_FORMAT = "format"
