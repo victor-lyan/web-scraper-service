@@ -11,7 +11,14 @@ data class AfishaCinema(
 ) : BaseEntity() {
     var movies: MutableList<AfishaCinemaMovie> = mutableListOf()
     
-    constructor(id: Int, name: String, linkAfisha: String, linkAbout: String) : this()
+    constructor(
+        id: Int, 
+        name: String, 
+        linkAfisha: String, 
+        linkAbout: String
+    ) : this(name, linkAfisha, linkAbout) {
+        this.id = id
+    }
 }
 
 data class AfishaMovie(
@@ -21,7 +28,9 @@ data class AfishaMovie(
 ) : BaseEntity() {
     var cinemas: MutableList<AfishaCinemaMovie> = mutableListOf()
     
-    constructor(id: Int, name: String, genre: String, link: String) : this()
+    constructor(id: Int, name: String, genre: String, link: String) : this(name, genre, link) {
+        this.id = id
+    }
 
     fun addCinema(cinema: AfishaCinema, movieDate: LocalDate, movieTime: LocalTime, format: String? = null) {
         val cinemaMovie = AfishaCinemaMovie(cinema, this, movieDate, movieTime, format)
@@ -46,25 +55,13 @@ data class AfishaMovie(
     }
 }
 
-class AfishaCinemaMovie {
-    var cinema: AfishaCinema
-
-    var movie: AfishaMovie
-
-    var movieDate: LocalDate
-
-    var movieTime: LocalTime
-
-    var format: String?
-
-    constructor(cinema: AfishaCinema, movie: AfishaMovie, date: LocalDate, time: LocalTime, format: String? = null) {
-        this.cinema = cinema
-        this.movie = movie
-        this.movieDate = date
-        this.movieTime = time
-        this.format = format
-    }
-
+class AfishaCinemaMovie(
+    var cinema: AfishaCinema, 
+    var movie: AfishaMovie, 
+    var movieDate: LocalDate, 
+    var movieTime: LocalTime, 
+    var format: String? = null
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
 

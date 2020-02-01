@@ -123,7 +123,7 @@ class AfishaMovieRepository(
         }
     }
     
-    fun findByDate(date: String): List<AfishaMovie>? {
+    fun findByDate(date: LocalDate): List<AfishaMovie> {
         val sql = """
             SELECT m.$COLUMN_ID AS $COLUMN_MOVIE_ID, m.$COLUMN_NAME AS $COLUMN_MOVIE_NAME,
             m.$COLUMN_GENRE, m.$COLUMN_LINK, c.$COLUMN_ID AS $COLUMN_CINEMA_ID,
@@ -132,8 +132,9 @@ class AfishaMovieRepository(
             FROM $TABLE_AFISHA_MOVIE AS m
             LEFT JOIN $TABLE_AFISHA_CINEMA_MOVIE cm ON cm.$COLUMN_MOVIE_ID = m.$COLUMN_ID
             LEFT JOIN $TABLE_AFISHA_CINEMA c ON c.$COLUMN_ID = cm.$COLUMN_CINEMA_ID
+            WHERE cm.$COLUMN_MOVIE_DATE = ?
         """.trimIndent()
-        return jdbcTemplate.query(sql, AfishaMovieListExtractor())
+        return jdbcTemplate.query(sql, arrayOf(date), AfishaMovieListExtractor()) ?: emptyList()
     }
 
     fun findAll(): List<AfishaCinema> {

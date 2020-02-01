@@ -1,11 +1,13 @@
 package com.wictorlyan.webscraperservice.service
 
-import com.wictorlyan.webscraperservice.repository.AfishaCinemaRepository
-import com.wictorlyan.webscraperservice.repository.AfishaMovieRepository
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaMovieRepository
+import com.wictorlyan.webscraperservice.repository.AfishaCinemaRepository
+import com.wictorlyan.webscraperservice.repository.AfishaMovieRepository
 import com.wictorlyan.webscraperservice.scraper.AfishaScraper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -18,12 +20,16 @@ class AfishaMovieService(
     val cinemaMovieRepository: AfishaCinemaMovieRepository,
     val afishaScraper: AfishaScraper
 ) {
+    val logger: Logger = LoggerFactory.getLogger(AfishaMovieService::class.java)
+    
     @Transactional
     fun doDailyScraping() {
+        logger.info("Daily movies schedule scraping started")
         val today = LocalDate.now()
         val todayString = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val todayMovies = afishaScraper.scrapeMoviesForDate(todayString)
         if (todayMovies.isEmpty()) {
+            logger.info("No movies found from Afisha")
             return
         }
         
@@ -50,6 +56,8 @@ class AfishaMovieService(
             cinemaMovieRepository.removeAllForMovieAndDate(currentMovieId, today)
             cinemaMovieRepository.saveAll(groupedByNameList)
         }
+        
+        logger.info("Daily movies schedule scraping finished")
     }
     
     @Transactional
@@ -67,5 +75,10 @@ class AfishaMovieService(
         movie1.addCinema(cinema2, LocalDate.parse("2020-01-01"), LocalTime.parse("10:00"), "3D")
         movie2.addCinema(cinema2, LocalDate.parse("2020-01-03"), LocalTime.parse("20:00"))
         movieRepository.saveAll(listOf(movie1, movie2))*/
+    }
+
+    fun getMoviesForToday(): List<AfishaMovie> {
+        val today = LocalDate.now()
+        return movieRepository.findByDate(today)
     }
 }
