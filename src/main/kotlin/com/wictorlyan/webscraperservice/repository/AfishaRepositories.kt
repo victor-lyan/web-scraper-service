@@ -1,10 +1,7 @@
 package com.wictorlyan.webscraperservice.repository
 
 import com.wictorlyan.webscraperservice.entity.*
-import com.wictorlyan.webscraperservice.mapper.AfishaCinemaMovieSetter
-import com.wictorlyan.webscraperservice.mapper.AfishaCinemaRowMapper
-import com.wictorlyan.webscraperservice.mapper.AfishaMovieListExtractor
-import com.wictorlyan.webscraperservice.mapper.AfishaMovieRowMapper
+import com.wictorlyan.webscraperservice.mapper.*
 import com.wictorlyan.webscraperservice.property.*
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
@@ -108,6 +105,38 @@ class AfishaMovieRepository(
             )
 
             return movieInDb.id
+        }
+    }
+
+    fun findById(id: Int, withCinemas: Boolean = false, date: String? = null): AfishaMovie? {
+        return try {
+            val movie = jdbcTemplate.queryForObject(
+                "SELECT * FROM $TABLE_AFISHA_MOVIE WHERE $COLUMN_ID = ?",
+                arrayOf(id),
+                AfishaMovieRowMapper()
+            )
+            if (movie != null && withCinemas) {
+                val dateSql = if (date == null) LocalDate.now() else LocalDate.parse(date)
+                val sql = """
+                    SELECT m.$COLUMN_ID AS $COLUMN_MOVIE_ID, m.$COLUMN_NAME AS $COLUMN_MOVIE_NAME,
+                    m.$COLUMN_GENRE, m.$COLUMN_LINK, c.$COLUMN_ID AS $COLUMN_CINEMA_ID, 
+                    c.$COLUMN_NAME AS $COLUMN_CINEMA_NAME, c.$COLUMN_LINK_AFISHA, c.$COLUMN_LINK_ABOUT,
+                    cm.$COLUMN_MOVIE_DATE, cm.$COLUMN_MOVIE_TIME, cm.$COLUMN_FORMAT 
+                    FROM $TABLE_AFISHA_MOVIE AS m
+                    LEFT JOIN $TABLE_AFISHA_CINEMA_MOVIE cm ON cm.$COLUMN_MOVIE_ID = m.$COLUMN_ID
+                    LEFT JOIN $TABLE_AFISHA_CINEMA c ON c.$COLUMN_ID = cm.$COLUMN_CINEMA_ID
+                    WHERE cm.$COLUMN_MOVIE_ID = ? AND cm.$COLUMN_MOVIE_DATE = ?
+                """.trimIndent()
+                val movieCinemas = jdbcTemplate.query(
+                    sql, 
+                    arrayOf(id, dateSql),
+                    AfishaCinemaListExtractor()
+                ) ?: emptyList()
+                movie.cinemas.addAll(movieCinemas)
+            }
+            movie
+        } catch (e: EmptyResultDataAccessException) {
+            null
         }
     }
 

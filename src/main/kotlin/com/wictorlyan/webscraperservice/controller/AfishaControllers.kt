@@ -2,12 +2,12 @@ package com.wictorlyan.webscraperservice.controller
 
 import com.wictorlyan.webscraperservice.dto.AfishaMovieDTO
 import com.wictorlyan.webscraperservice.dto.AfishaMovieScheduleDTO
+import com.wictorlyan.webscraperservice.dto.AfishaMovieSmallDTO
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
 import com.wictorlyan.webscraperservice.service.AfishaMovieService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/afisha-movie")
@@ -15,19 +15,43 @@ class AfishaMovieController(
     val afishaMovieService: AfishaMovieService
 ) {
     @GetMapping("/today-schedule")
-    fun getMoviesForToday(): AfishaMovieScheduleDTO {
+    fun getMoviesForToday(@RequestParam(required = false) short: String?): AfishaMovieScheduleDTO {
         val moviesForToday = afishaMovieService.getMoviesForToday()
-        val result = mutableListOf<AfishaMovieDTO>()
-        moviesForToday.forEach {
-            result.add(AfishaMovieDTO(it))
-        }
         
-        return AfishaMovieScheduleDTO(result)
+        return AfishaMovieScheduleDTO(
+            if (short == null)
+                getFullMoviesList(moviesForToday) 
+            else 
+                getSmallMoviesList(moviesForToday)
+        )
     }
     
     @GetMapping("/{id}")
-    fun getMovie(@PathVariable id: Int): AfishaMovieDTO {
-        val movie = AfishaMovie("Test movie", "Fantasy", "https://afisha.uz/test")
-        return AfishaMovieDTO(movie)
+    fun getMovie(
+        @PathVariable id: Int, 
+        @RequestParam(required = false) date: String?
+    ): ResponseEntity<AfishaMovieDTO> {
+        val movie = afishaMovieService.getMovieWithCinemas(id, date)
+        return if (movie == null) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        } else {
+            ResponseEntity.ok(AfishaMovieDTO(movie))
+        }
+    }
+    
+    private fun getSmallMoviesList(movies: List<AfishaMovie>): List<AfishaMovieSmallDTO> {
+        val result = mutableListOf<AfishaMovieSmallDTO>()
+        movies.forEach {
+            result.add(AfishaMovieSmallDTO(it.id, it.name, it.genre))
+        }
+        return result
+    }
+
+    private fun getFullMoviesList(movies: List<AfishaMovie>): List<AfishaMovieDTO> {
+        val result = mutableListOf<AfishaMovieDTO>()
+        movies.forEach {
+            result.add(AfishaMovieDTO(it))
+        }
+        return result
     }
 }

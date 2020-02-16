@@ -79,6 +79,35 @@ class AfishaMovieListExtractor : ResultSetExtractor<List<AfishaMovie>> {
     }
 }
 
+class AfishaCinemaListExtractor : ResultSetExtractor<List<AfishaCinemaMovie>> {
+    override fun extractData(rs: ResultSet): List<AfishaCinemaMovie> {
+        val result = mutableListOf<AfishaCinemaMovie>()
+        while (rs.next()) {
+            val cinemaId = rs.getInt(COLUMN_CINEMA_ID)
+            val cinemaName = rs.getString(COLUMN_CINEMA_NAME)
+            val cinemaLinkAfisha = rs.getString(COLUMN_LINK_AFISHA)
+            val cinemaLinkAbout = rs.getString(COLUMN_LINK_ABOUT)
+            val movieDate = rs.getString(COLUMN_MOVIE_DATE)
+            val movieTime = rs.getString(COLUMN_MOVIE_TIME)
+            val movieFormat = rs.getString(COLUMN_FORMAT)
+            val movieId = rs.getInt(COLUMN_MOVIE_ID)
+            val movieName = rs.getString(COLUMN_MOVIE_NAME)
+            val movieGenre = rs.getString(COLUMN_GENRE)
+            val movieLink = rs.getString(COLUMN_LINK)
+            
+            result.add(AfishaCinemaMovie(
+                AfishaCinema(cinemaId, cinemaName, cinemaLinkAfisha, cinemaLinkAbout),
+                AfishaMovie(movieId, movieName, movieGenre, movieLink),
+                LocalDate.parse(movieDate),
+                LocalTime.parse(movieTime),
+                movieFormat
+            ))
+        }
+
+        return result
+    }
+}
+
 class AfishaCinemaMovieSetter(val cinemaMovieList: List<AfishaCinemaMovie>) : BatchPreparedStatementSetter {
     override fun setValues(ps: PreparedStatement, i: Int) {
         ps.setInt(1, cinemaMovieList[i].cinema.id)

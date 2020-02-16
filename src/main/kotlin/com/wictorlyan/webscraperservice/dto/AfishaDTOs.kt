@@ -10,25 +10,23 @@ data class AfishaCinemaMovieDTO(
     var date: LocalDate,
     var time: LocalTime,
     var format: String?
-) {
-    
-}
+)
 
 data class AfishaCinemaDTO(
     var id: Int,
     var name: String,
     var linkAfisha: String,
     var linkAbout: String
-) {
+)
 
-}
+abstract class BaseAfishaMovieDTO
 
 data class AfishaMovieDTO(
     var id: Int,
     var name: String,
     var genre: String,
     var link: String
-) {
+): BaseAfishaMovieDTO() {
     var cinemas: MutableList<AfishaCinemaMovieDTO> = mutableListOf()
 
     constructor(movie: AfishaMovie) : this(movie.id, movie.name, movie.genre, movie.link) {
@@ -44,8 +42,6 @@ data class AfishaMovieDTO(
     }
 }
 
-data class AfishaMovieScheduleDTO(val result: List<AfishaMovieDTO>) {
-    /*constructor(movies: List<AfishaMovie>) : this() {
-        
-    }*/
-}
+data class AfishaMovieSmallDTO(val id: Int, val name: String, val genre: String) : BaseAfishaMovieDTO()
+
+data class AfishaMovieScheduleDTO(val result: List<BaseAfishaMovieDTO>)

@@ -25,60 +25,52 @@ class AfishaMovieService(
     @Transactional
     fun doDailyScraping() {
         logger.info("Daily movies schedule scraping started")
-        val today = LocalDate.now()
-        val todayString = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        val todayMovies = afishaScraper.scrapeMoviesForDate(todayString)
-        if (todayMovies.isEmpty()) {
-            logger.info("No movies found from Afisha")
-            return
-        }
-        
-        // here we store all cinemas that we updated in order not to do unnecessary updates next times
-        val updatedCinemas = mutableMapOf<String, AfishaCinema>()
-        for ((_, groupedByNameList) in todayMovies) {
-            // all movies in the groupedByNameList are the same, that's why we update the first one and
-            // use it's ID next
-            val currentMovieId = movieRepository.save(groupedByNameList[0].movie)
-            groupedByNameList.forEach {
-                val currentCinemaId: Int
-                if (!updatedCinemas.containsKey(it.cinema.name)) {
-                    currentCinemaId = cinemaRepository.save(it.cinema)
-                    updatedCinemas[it.cinema.name] = it.cinema
-                } else {
-                    currentCinemaId = updatedCinemas[it.cinema.name]!!.id
+        try {
+            val today = LocalDate.now()
+            val todayString = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val todayMovies = afishaScraper.scrapeMoviesForDate(todayString)
+            if (todayMovies.isEmpty()) {
+                logger.info("No movies found from Afisha")
+                return
+            }
+            logger.info("${todayMovies.size} movies found today")
+
+            // here we store all cinemas that we updated in order not to do unnecessary updates next times
+            val updatedCinemas = mutableMapOf<String, AfishaCinema>()
+            for ((_, groupedByNameList) in todayMovies) {
+                // all movies in the groupedByNameList are the same, that's why we update the first one and
+                // use it's ID next
+                val currentMovieId = movieRepository.save(groupedByNameList[0].movie)
+                groupedByNameList.forEach {
+                    val currentCinemaId: Int
+                    if (!updatedCinemas.containsKey(it.cinema.name)) {
+                        currentCinemaId = cinemaRepository.save(it.cinema)
+                        updatedCinemas[it.cinema.name] = it.cinema
+                    } else {
+                        currentCinemaId = updatedCinemas[it.cinema.name]!!.id
+                    }
+                    
+                    it.cinema.id = currentCinemaId
+                    it.movie.id = currentMovieId
                 }
                 
-                it.cinema.id = currentCinemaId
-                it.movie.id = currentMovieId
+                // here we remove records for movie and date and do batch insert
+                cinemaMovieRepository.removeAllForMovieAndDate(currentMovieId, today)
+                cinemaMovieRepository.saveAll(groupedByNameList)
             }
-            
-            // here we remove records for movie and date and do batch insert
-            cinemaMovieRepository.removeAllForMovieAndDate(currentMovieId, today)
-            cinemaMovieRepository.saveAll(groupedByNameList)
+        } catch (e: Exception) {
+            logger.error("Some error occurred in doDailyScraping method: ${e.message}")
         }
-        
+
         logger.info("Daily movies schedule scraping finished")
-    }
-    
-    @Transactional
-    fun doTest() {
-        val cinema1 = AfishaCinema("Premier Hall", "http://link1.org", "http://link1.com")
-        val cinema2 = AfishaCinema("Compass Cinema", "http://link2.org", "http://link33.com")
-        cinemaRepository.save(cinema1)
-        cinemaRepository.save(cinema2)
-
-        cinemaRepository.findAll().forEach {println(it)}
-
-        /*val movie1 = AfishaMovie("South Park", "horror", "http://example.com")
-        val movie2 = AfishaMovie("Witcher", "adventure", "http://witcher-sucks.com")
-        movie1.addCinema(cinema1, LocalDate.parse("2020-01-01"), LocalTime.parse("15:00"), "3D")
-        movie1.addCinema(cinema2, LocalDate.parse("2020-01-01"), LocalTime.parse("10:00"), "3D")
-        movie2.addCinema(cinema2, LocalDate.parse("2020-01-03"), LocalTime.parse("20:00"))
-        movieRepository.saveAll(listOf(movie1, movie2))*/
     }
 
     fun getMoviesForToday(): List<AfishaMovie> {
         val today = LocalDate.now()
         return movieRepository.findByDate(today)
+    }
+
+    fun getMovieWithCinemas(id: Int, date: String?): AfishaMovie? {
+        return movieRepository.findById(id, true, date)
     }
 }
