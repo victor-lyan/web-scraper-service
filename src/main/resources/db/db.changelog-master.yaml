@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: createInitialSchema
+      author: Victor Lyan
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            path: scripts/01-create-initial-schema.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: drop table afisha_cinemas_movies; drop table afisha_movies; drop table afisha_cinemas; 

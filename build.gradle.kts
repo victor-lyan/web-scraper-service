@@ -29,9 +29,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jsoup:jsoup:1.12.1")
-	implementation("com.vladmihalcea:hibernate-types-52:2.8.0")
-	//developmentOnly("org.springframework.boot:spring-boot-devtools")
+	implementation("org.liquibase:liquibase-core:3.8.2")
 	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}

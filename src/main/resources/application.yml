@@ -3,13 +3,14 @@ server:
   
 spring:
   datasource:
-    #schema: classpath*:db/schema.sql
-    #data: classpath*:db/data.sql
     url: jdbc:postgresql://localhost:5432/wss
     username: wss_user
     password: wss_password
     initialization-mode: never
-  
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    changeLog: classpath:db/db.changelog-master.yaml
+
 
 afisha:
   movies:
