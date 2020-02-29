@@ -11,5 +11,6 @@ class AfishaMoviesTask(
     @Scheduled(initialDelay = 300, fixedDelay = 3_600_000)
     fun dailyScrapingTask() {
         movieService.doDailyScraping()
+        movieService.updateMoviesLinksAndImages()
     }
 }

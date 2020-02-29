@@ -25,14 +25,15 @@ data class AfishaMovieDTO(
     var id: Int,
     var name: String,
     var genre: String,
-    var link: String
+    var link: String,
+    var image: String?
 ): BaseAfishaMovieDTO() {
     var cinemas: MutableList<AfishaCinemaMovieDTO> = mutableListOf()
 
-    constructor(movie: AfishaMovie) : this(movie.id, movie.name, movie.genre, movie.link) {
+    constructor(movie: AfishaMovie) : this(movie.id, movie.name, movie.genre, movie.link, movie.image) {
         movie.cinemas.forEach {
             cinemas.add(AfishaCinemaMovieDTO(
-                AfishaMovieDTO(it.movie.id, it.movie.name, it.movie.genre, it.movie.link),
+                AfishaMovieDTO(it.movie.id, it.movie.name, it.movie.genre, it.movie.link, it.movie.image),
                 AfishaCinemaDTO(it.cinema.id, it.cinema.name, it.cinema.linkAfisha, it.cinema.linkAbout),
                 it.movieDate,
                 it.movieTime,

@@ -24,7 +24,8 @@ data class AfishaCinema(
 data class AfishaMovie(
     var name: String = "",
     var genre: String = "",
-    var link: String = ""
+    var link: String = "",
+    var image: String? = null
 ) : BaseEntity() {
     var cinemas: MutableList<AfishaCinemaMovie> = mutableListOf()
     

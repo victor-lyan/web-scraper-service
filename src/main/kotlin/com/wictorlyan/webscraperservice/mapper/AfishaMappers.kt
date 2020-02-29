@@ -30,6 +30,7 @@ class AfishaMovieRowMapper : RowMapper<AfishaMovie> {
             name = rs.getString(COLUMN_NAME)
             genre = rs.getString(COLUMN_GENRE)
             link = rs.getString(COLUMN_LINK)
+            image = rs.getString(COLUMN_IMAGE)
             createdDate = rs.getTimestamp(COLUMN_CREATED_DATE).toInstant()
             modifiedDate = rs.getTimestamp(COLUMN_MODIFIED_DATE).toInstant()
         }

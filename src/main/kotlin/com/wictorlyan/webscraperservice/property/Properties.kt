@@ -13,5 +13,6 @@ class AfishaProperties {
     class Movies {
         lateinit var baseUrl: String
         lateinit var skipMoviesCriteria: String
+        lateinit var wrongLinkPart: String
     }
 }

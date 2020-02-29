@@ -28,10 +28,23 @@ class AfishaMovieController(
     
     @GetMapping("/{id}")
     fun getMovie(
-        @PathVariable id: Int, 
+        @PathVariable id: Int,
         @RequestParam(required = false) date: String?
     ): ResponseEntity<AfishaMovieDTO> {
         val movie = afishaMovieService.getMovieWithCinemas(id, date)
+        return if (movie == null) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        } else {
+            ResponseEntity.ok(AfishaMovieDTO(movie))
+        }
+    }
+    
+    @GetMapping("/get-by-name/{name}")
+    fun getMovieByName(
+        @PathVariable name: String, 
+        @RequestParam(required = false) date: String?
+    ): ResponseEntity<AfishaMovieDTO> {
+        val movie = afishaMovieService.getMovieWithCinemas(name, date)
         return if (movie == null) {
             ResponseEntity(HttpStatus.NOT_FOUND)
         } else {

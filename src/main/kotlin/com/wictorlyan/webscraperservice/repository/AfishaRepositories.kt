@@ -72,7 +72,8 @@ class AfishaCinemaRepository(
 
 @Repository
 class AfishaMovieRepository(
-    val jdbcTemplate: JdbcTemplate
+    val jdbcTemplate: JdbcTemplate,
+    val afishaProperties: AfishaProperties
 ) {
     fun save(movie: AfishaMovie): Int {
         val movieInDb = findByNameAndGenre(movie.name, movie.genre)
@@ -85,6 +86,7 @@ class AfishaMovieRepository(
                 COLUMN_NAME to movie.name,
                 COLUMN_GENRE to movie.genre,
                 COLUMN_LINK to movie.link,
+                COLUMN_IMAGE to movie.image,
                 COLUMN_CREATED_DATE to Timestamp.from(movie.createdDate),
                 COLUMN_MODIFIED_DATE to Timestamp.from(movie.modifiedDate)
             )
@@ -95,11 +97,13 @@ class AfishaMovieRepository(
                 "$COLUMN_NAME = ?," +
                 "$COLUMN_GENRE = ?," +
                 "$COLUMN_LINK = ?," +
+                "$COLUMN_IMAGE = ?," +
                 "$COLUMN_MODIFIED_DATE = ? " +
                 "WHERE $COLUMN_ID = ?",
                 movie.name,
                 movie.genre,
                 movie.link,
+                movie.image,
                 Timestamp.from(Instant.now()),
                 movieInDb.id
             )
@@ -108,13 +112,33 @@ class AfishaMovieRepository(
         }
     }
 
-    fun findById(id: Int, withCinemas: Boolean = false, date: String? = null): AfishaMovie? {
+    fun findByIdOrName(
+        id: Int? = null, 
+        name: String? = null, 
+        withCinemas: Boolean = false, 
+        date: String? = null
+    ): AfishaMovie? {
         return try {
+            if (id == null && name == null) {
+                throw EmptyResultDataAccessException(1)
+            }
+            
+            val whereCondition: String
+            val paramArray: Array<Any?>
+            if (id == null) {
+                whereCondition = "$COLUMN_NAME = ?"
+                paramArray = arrayOf(name)
+            } else {
+                whereCondition = "$COLUMN_ID = ?"
+                paramArray = arrayOf(id)
+            }
+            
             val movie = jdbcTemplate.queryForObject(
-                "SELECT * FROM $TABLE_AFISHA_MOVIE WHERE $COLUMN_ID = ?",
-                arrayOf(id),
+                "SELECT * FROM $TABLE_AFISHA_MOVIE WHERE $whereCondition",
+                paramArray,
                 AfishaMovieRowMapper()
             )
+            
             if (movie != null && withCinemas) {
                 val dateSql = if (date == null) LocalDate.now() else LocalDate.parse(date)
                 val sql = """
@@ -125,11 +149,11 @@ class AfishaMovieRepository(
                     FROM $TABLE_AFISHA_MOVIE AS m
                     LEFT JOIN $TABLE_AFISHA_CINEMA_MOVIE cm ON cm.$COLUMN_MOVIE_ID = m.$COLUMN_ID
                     LEFT JOIN $TABLE_AFISHA_CINEMA c ON c.$COLUMN_ID = cm.$COLUMN_CINEMA_ID
-                    WHERE cm.$COLUMN_MOVIE_ID = ? AND cm.$COLUMN_MOVIE_DATE = ?
+                    WHERE m.$whereCondition AND cm.$COLUMN_MOVIE_DATE = ?
                 """.trimIndent()
                 val movieCinemas = jdbcTemplate.query(
-                    sql, 
-                    arrayOf(id, dateSql),
+                    sql,
+                    paramArray.plus(dateSql),
                     AfishaCinemaListExtractor()
                 ) ?: emptyList()
                 movie.cinemas.addAll(movieCinemas)
@@ -166,12 +190,18 @@ class AfishaMovieRepository(
         return jdbcTemplate.query(sql, arrayOf(date), AfishaMovieListExtractor()) ?: emptyList()
     }
 
-    fun findAll(): List<AfishaCinema> {
-        return jdbcTemplate.query("SELECT * FROM $TABLE_AFISHA_MOVIE", AfishaCinemaRowMapper())
+    fun findAll(): List<AfishaMovie> {
+        return jdbcTemplate.query("SELECT * FROM $TABLE_AFISHA_MOVIE", AfishaMovieRowMapper())
     }
 
     fun removeById(movie: AfishaMovie) {
         jdbcTemplate.update("DELETE FROM $TABLE_AFISHA_MOVIE WHERE $COLUMN_ID = ?", movie.id)
+    }
+
+    fun getMoviesForUpdate(): List<AfishaMovie> {
+        val sql = "SELECT * FROM $TABLE_AFISHA_MOVIE WHERE $COLUMN_IMAGE IS NULL " +
+            "OR $COLUMN_LINK LIKE '%${afishaProperties.movies.wrongLinkPart}%'"
+        return jdbcTemplate.query(sql, AfishaMovieRowMapper())
     }
 }
 

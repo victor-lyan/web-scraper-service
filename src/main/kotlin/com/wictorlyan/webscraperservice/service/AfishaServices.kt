@@ -2,6 +2,7 @@ package com.wictorlyan.webscraperservice.service
 
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
+import com.wictorlyan.webscraperservice.property.AfishaProperties
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaMovieRepository
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaRepository
 import com.wictorlyan.webscraperservice.repository.AfishaMovieRepository
@@ -18,7 +19,8 @@ class AfishaMovieService(
     val cinemaRepository: AfishaCinemaRepository,
     val movieRepository: AfishaMovieRepository,
     val cinemaMovieRepository: AfishaCinemaMovieRepository,
-    val afishaScraper: AfishaScraper
+    val afishaScraper: AfishaScraper,
+    val afishaProperties: AfishaProperties
 ) {
     val logger: Logger = LoggerFactory.getLogger(AfishaMovieService::class.java)
     
@@ -71,6 +73,29 @@ class AfishaMovieService(
     }
 
     fun getMovieWithCinemas(id: Int, date: String?): AfishaMovie? {
-        return movieRepository.findById(id, true, date)
+        return movieRepository.findByIdOrName(id, withCinemas = true, date = date)
+    }
+
+    fun getMovieWithCinemas(name: String, date: String?): AfishaMovie? {
+        return movieRepository.findByIdOrName(name = name, withCinemas = true, date = date)
+    }
+    
+    @Transactional
+    fun updateMoviesLinksAndImages() {
+        logger.info("Update movies and links started")
+        val moviesForUpdate = movieRepository.getMoviesForUpdate()
+        logger.info("Found ${moviesForUpdate.size} movies for update")
+        
+        moviesForUpdate.forEach {
+            val imageAndLink = afishaScraper.scrapeMovieImageAndLink(it)
+
+            // we update movie link only if it contains wrong part
+            if (it.link.contains(afishaProperties.movies.wrongLinkPart)) {
+                it.link = "${afishaProperties.baseUrl}${imageAndLink.second}"
+            }
+            it.image = imageAndLink.first
+            movieRepository.save(it)
+        }
+        logger.info("Update movies and links finished")
     }
 }

@@ -16,4 +16,5 @@ afisha:
   movies:
     baseUrl: "https://www.afisha.uz/afisha/movies/"
     skipMoviesCriteria: "на узбекском"
+    wrongLinkPart: "cinema"
   baseUrl: "https://www.afisha.uz"

@@ -70,4 +70,14 @@ class AfishaScraper(
 
         return result
     }
+    
+    fun scrapeMovieImageAndLink(movie: AfishaMovie): Pair<String, String> {
+        val document = Jsoup.connect(movie.link).get()
+        val image = document.selectFirst(".image img")
+        val imageUrl = image.attr("src")
+        val linksBlock = document.selectFirst(".block_grey .links")
+        val descriptionLink = linksBlock.selectFirst("li:last-child a").attr("href")
+        
+        return Pair(imageUrl, descriptionLink)
+    }
 }
