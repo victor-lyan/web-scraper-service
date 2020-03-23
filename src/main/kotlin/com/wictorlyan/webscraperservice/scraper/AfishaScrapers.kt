@@ -3,6 +3,7 @@ package com.wictorlyan.webscraperservice.scraper
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
 import com.wictorlyan.webscraperservice.entity.AfishaCinemaMovie
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
+import com.wictorlyan.webscraperservice.exception.AfishaMoviesNotFoundException
 import com.wictorlyan.webscraperservice.property.AfishaProperties
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Component
@@ -18,6 +19,7 @@ class AfishaScraper(
         val url = "${afishaProperties.movies.baseUrl}?date=$date"
         val document = Jsoup.connect(url).get()
         val table = document.selectFirst(".schedule table")
+            ?: throw AfishaMoviesNotFoundException("No movies found for date: $date")
         val currentMovies = mutableListOf<AfishaMovie>()
 
         table.select("tbody tr:not(.day)").forEach { row ->

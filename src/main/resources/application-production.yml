@@ -1,0 +1,20 @@
+server:
+  port: 9096
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/wss
+    username: wss_user
+    password: wss_password
+    initialization-mode: never
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    changeLog: classpath:db/db.changelog-master.yaml
+
+
+afisha:
+  movies:
+    baseUrl: "https://www.afisha.uz/afisha/movies/"
+    skipMoviesCriteria: "на узбекском"
+    wrongLinkPart: "cinema"
+  baseUrl: "https://www.afisha.uz"

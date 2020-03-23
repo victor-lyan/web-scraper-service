@@ -14,15 +14,18 @@ import org.springframework.web.bind.annotation.*
 class AfishaMovieController(
     val afishaMovieService: AfishaMovieService
 ) {
-    @GetMapping("/today-schedule")
-    fun getMoviesForToday(@RequestParam(required = false) short: String?): AfishaMovieScheduleDTO {
-        val moviesForToday = afishaMovieService.getMoviesForToday()
+    @GetMapping("/daily-schedule")
+    fun getMoviesForDate(
+        @RequestParam(required = false) short: String?,
+        @RequestParam(required = false) date: String?
+    ): AfishaMovieScheduleDTO {
+        val moviesForDate = afishaMovieService.getMoviesForDate(date)
         
         return AfishaMovieScheduleDTO(
             if (short == null)
-                getFullMoviesList(moviesForToday) 
+                getFullMoviesList(moviesForDate) 
             else 
-                getSmallMoviesList(moviesForToday)
+                getSmallMoviesList(moviesForDate)
         )
     }
     

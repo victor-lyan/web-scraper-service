@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.bmuschko.gradle.docker.tasks.image.*
 
 plugins {
 	id("org.springframework.boot") version "2.2.2.RELEASE"
 	id("io.spring.dependency-management") version "1.0.8.RELEASE"
+	id("com.bmuschko.docker-remote-api") version "6.2.0"
 	kotlin("jvm") version "1.3.61"
 	kotlin("plugin.spring") version "1.3.61"
 }
@@ -46,4 +48,36 @@ tasks.withType<KotlinCompile> {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
 		jvmTarget = "1.8"
 	}
+}
+
+val dockerBuildDir = "build/docker/"
+val jar: Jar by tasks
+
+tasks.create("createDockerfile", Dockerfile::class) {
+	from("openjdk:8-jre-alpine")
+	copyFile(jar.archiveFileName.get(), "/app/web-scraper-service.jar")
+	entryPoint("java")
+	defaultCommand("-jar", "/app/web-scraper-service.jar", "-Dspring.profiles.active=production")
+	exposePort(9096)
+}
+
+tasks.create("syncJar", Copy::class) {
+	dependsOn("build")
+	from(jar.archiveFile)
+	into(dockerBuildDir)
+}
+
+tasks.create("removeOldImage", DockerRemoveImage::class) {
+	targetImageId("wictor-lyan/web-scraper-service")
+	onError {println(message)}
+}
+
+tasks.create("buildDockerImage", DockerBuildImage::class) {
+	dependsOn("removeOldImage", "syncJar", "createDockerfile")
+	images.add("wictor-lyan/web-scraper-service:latest")
+}
+
+tasks.create("pushDockerImage", DockerPushImage::class) {
+	dependsOn("buildDockerImage")
+	
 }

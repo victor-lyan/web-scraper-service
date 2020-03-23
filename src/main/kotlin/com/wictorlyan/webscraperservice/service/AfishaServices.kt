@@ -1,6 +1,7 @@
 package com.wictorlyan.webscraperservice.service
 
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
+import com.wictorlyan.webscraperservice.entity.AfishaCinemaMovie
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
 import com.wictorlyan.webscraperservice.property.AfishaProperties
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaMovieRepository
@@ -11,6 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -25,51 +27,60 @@ class AfishaMovieService(
     val logger: Logger = LoggerFactory.getLogger(AfishaMovieService::class.java)
     
     @Transactional
-    fun doDailyScraping() {
-        logger.info("Daily movies schedule scraping started")
+    fun doDailyScraping(date: LocalDate) {
+        logger.info("Daily movies schedule scraping started for date: $date")
         try {
-            val today = LocalDate.now()
-            val todayString = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            val todayMovies = afishaScraper.scrapeMoviesForDate(todayString)
-            if (todayMovies.isEmpty()) {
+            val dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val moviesForDate = afishaScraper.scrapeMoviesForDate(dateString)
+            if (moviesForDate.isEmpty()) {
                 logger.info("No movies found from Afisha")
                 return
             }
-            logger.info("${todayMovies.size} movies found today")
+            logger.info("${moviesForDate.size} movies found for date: $dateString")
 
-            // here we store all cinemas that we updated in order not to do unnecessary updates next times
-            val updatedCinemas = mutableMapOf<String, AfishaCinema>()
-            for ((_, groupedByNameList) in todayMovies) {
-                // all movies in the groupedByNameList are the same, that's why we update the first one and
-                // use it's ID next
-                val currentMovieId = movieRepository.save(groupedByNameList[0].movie)
-                groupedByNameList.forEach {
-                    val currentCinemaId: Int
-                    if (!updatedCinemas.containsKey(it.cinema.name)) {
-                        currentCinemaId = cinemaRepository.save(it.cinema)
-                        updatedCinemas[it.cinema.name] = it.cinema
-                    } else {
-                        currentCinemaId = updatedCinemas[it.cinema.name]!!.id
-                    }
-                    
-                    it.cinema.id = currentCinemaId
-                    it.movie.id = currentMovieId
-                }
-                
-                // here we remove records for movie and date and do batch insert
-                cinemaMovieRepository.removeAllForMovieAndDate(currentMovieId, today)
-                cinemaMovieRepository.saveAll(groupedByNameList)
-            }
+            processMovies(moviesForDate, date)
         } catch (e: Exception) {
             logger.error("Some error occurred in doDailyScraping method: ${e.message}")
         }
 
-        logger.info("Daily movies schedule scraping finished")
+        logger.info("Daily movies schedule scraping finished for date: $date")
     }
 
-    fun getMoviesForToday(): List<AfishaMovie> {
-        val today = LocalDate.now()
-        return movieRepository.findByDate(today)
+    private fun processMovies(moviesForDate: Map<String, List<AfishaCinemaMovie>>, date: LocalDate) {
+        // here we store all cinemas that we updated in order not to do unnecessary updates next times
+        val updatedCinemas = mutableMapOf<String, AfishaCinema>()
+        for ((_, groupedByNameList) in moviesForDate) {
+            // all movies in the groupedByNameList are the same, that's why we update the first one and
+            // use it's ID next
+            val currentMovieId = movieRepository.save(groupedByNameList[0].movie)
+            groupedByNameList.forEach {
+                val currentCinemaId: Int
+                if (!updatedCinemas.containsKey(it.cinema.name)) {
+                    it.cinema.modifiedDate = Instant.now()
+                    currentCinemaId = cinemaRepository.save(it.cinema)
+                    updatedCinemas[it.cinema.name] = it.cinema
+                } else {
+                    currentCinemaId = updatedCinemas[it.cinema.name]!!.id
+                }
+
+                it.cinema.id = currentCinemaId
+                it.movie.id = currentMovieId
+            }
+
+            // here we remove records for movie and date and do batch insert
+            cinemaMovieRepository.removeAllForMovieAndDate(currentMovieId, date)
+            cinemaMovieRepository.saveAll(groupedByNameList)
+        }
+    }
+
+    fun getMoviesForDate(date: String?): List<AfishaMovie> {
+        val dateObject = try {
+            LocalDate.parse(date)
+        } catch (e: Exception) {
+            // by default use today
+            LocalDate.now()
+        }
+        return movieRepository.findByDate(dateObject)
     }
 
     fun getMovieWithCinemas(id: Int, date: String?): AfishaMovie? {
