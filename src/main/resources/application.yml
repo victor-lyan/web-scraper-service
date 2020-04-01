@@ -10,6 +10,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     changeLog: classpath:db/db.changelog-master.yaml
+    enabled: false
 
 
 afisha:
@@ -17,4 +18,11 @@ afisha:
     baseUrl: "https://www.afisha.uz/afisha/movies/"
     skipMoviesCriteria: "на узбекском"
     wrongLinkPart: "cinema"
+  news:
+    baseUrl: "https://www.gazeta.uz/ru/rss/?section=coronavirus"
   baseUrl: "https://www.afisha.uz"
+  baseUrlGazeta: "https://www.gazeta.uz"
+  
+coronavirus:
+  globalStats:
+    baseUrl: "https://www.worldometers.info/coronavirus/"

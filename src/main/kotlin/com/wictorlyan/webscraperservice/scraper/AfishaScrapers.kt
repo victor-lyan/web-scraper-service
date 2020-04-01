@@ -3,9 +3,11 @@ package com.wictorlyan.webscraperservice.scraper
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
 import com.wictorlyan.webscraperservice.entity.AfishaCinemaMovie
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
+import com.wictorlyan.webscraperservice.entity.AfishaNewsArticle
 import com.wictorlyan.webscraperservice.exception.AfishaMoviesNotFoundException
 import com.wictorlyan.webscraperservice.property.AfishaProperties
 import org.jsoup.Jsoup
+import org.jsoup.parser.Parser
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalTime
@@ -81,5 +83,23 @@ class AfishaScraper(
         val descriptionLink = linksBlock.selectFirst("li:last-child a").attr("href")
         
         return Pair(imageUrl, descriptionLink)
+    }
+    
+    fun scrapeLatestNews(): List<AfishaNewsArticle> {
+        val result: MutableList<AfishaNewsArticle> = mutableListOf()
+        val url = afishaProperties.news.baseUrl
+        val document = Jsoup.connect(url).get()
+        
+        val newsBlock = document.selectFirst("channel").select("item")
+        newsBlock.forEach {
+            result.add(AfishaNewsArticle(
+                it.selectFirst("title").text(),
+                it.selectFirst("link").text(),
+                it.selectFirst("pubDateFormatted").text(),
+                Parser.unescapeEntities(it.selectFirst("description").text(), true)
+            ))
+        }
+        
+        return result
     }
 }

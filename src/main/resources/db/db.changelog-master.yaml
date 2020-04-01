@@ -12,4 +12,18 @@ databaseChangeLog:
             stripComments: true
       rollback:
         - sql:
-            sql: drop table afisha_cinemas_movies; drop table afisha_movies; drop table afisha_cinemas; 
+            sql: drop table afisha_cinemas_movies; drop table afisha_movies; drop table afisha_cinemas;
+  - changeSet:
+      id: addCoronavirusCountryStatsTable
+      author: Victor Lyan
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: utf8
+            path: scripts/02-create-coronavirus-country-stats-table.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
+      rollback:
+        - sql:
+            sql: drop table corona_country_stats;

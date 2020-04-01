@@ -3,8 +3,10 @@ package com.wictorlyan.webscraperservice.controller
 import com.wictorlyan.webscraperservice.dto.AfishaMovieDTO
 import com.wictorlyan.webscraperservice.dto.AfishaMovieScheduleDTO
 import com.wictorlyan.webscraperservice.dto.AfishaMovieSmallDTO
+import com.wictorlyan.webscraperservice.dto.AfishaNewsListDTO
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
 import com.wictorlyan.webscraperservice.service.AfishaMovieService
+import com.wictorlyan.webscraperservice.service.AfishaNewsService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -69,5 +71,16 @@ class AfishaMovieController(
             result.add(AfishaMovieDTO(it))
         }
         return result
+    }
+}
+
+@RestController
+@RequestMapping("/afisha-news")
+class AfishaNewsController(
+    val afishaNewsService: AfishaNewsService
+) {
+    @GetMapping("/latest")
+    fun getLatestNews(): AfishaNewsListDTO {
+        return AfishaNewsListDTO(afishaNewsService.getLatestNews())
     }
 }

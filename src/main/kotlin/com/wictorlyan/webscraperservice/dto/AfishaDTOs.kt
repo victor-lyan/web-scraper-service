@@ -1,6 +1,7 @@
 package com.wictorlyan.webscraperservice.dto
 
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
+import com.wictorlyan.webscraperservice.entity.AfishaNewsArticle
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -46,3 +47,5 @@ data class AfishaMovieDTO(
 data class AfishaMovieSmallDTO(val id: Int, val name: String, val genre: String) : BaseAfishaMovieDTO()
 
 data class AfishaMovieScheduleDTO(val result: List<BaseAfishaMovieDTO>)
+
+data class AfishaNewsListDTO(val result: List<AfishaNewsArticle>)

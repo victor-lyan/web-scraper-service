@@ -3,6 +3,7 @@ package com.wictorlyan.webscraperservice.service
 import com.wictorlyan.webscraperservice.entity.AfishaCinema
 import com.wictorlyan.webscraperservice.entity.AfishaCinemaMovie
 import com.wictorlyan.webscraperservice.entity.AfishaMovie
+import com.wictorlyan.webscraperservice.entity.AfishaNewsArticle
 import com.wictorlyan.webscraperservice.property.AfishaProperties
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaMovieRepository
 import com.wictorlyan.webscraperservice.repository.AfishaCinemaRepository
@@ -108,5 +109,15 @@ class AfishaMovieService(
             movieRepository.save(it)
         }
         logger.info("Update movies and links finished")
+    }
+}
+
+@Service
+class AfishaNewsService(
+    val afishaScraper: AfishaScraper,
+    val afishaProperties: AfishaProperties
+) {
+    fun getLatestNews(): List<AfishaNewsArticle> {
+        return afishaScraper.scrapeLatestNews()
     }
 }

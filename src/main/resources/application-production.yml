@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/wss
-    username: wss_user
-    password: wss_password
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     initialization-mode: never
     driver-class-name: org.postgresql.Driver
   liquibase:
@@ -17,4 +17,11 @@ afisha:
     baseUrl: "https://www.afisha.uz/afisha/movies/"
     skipMoviesCriteria: "на узбекском"
     wrongLinkPart: "cinema"
+  news:
+    baseUrl: "https://www.gazeta.uz/ru/rss/?section=coronavirus"
   baseUrl: "https://www.afisha.uz"
+  baseUrlGazeta: "https://www.gazeta.uz"
+  
+coronavirus:
+  globalStats:
+    baseUrl: "https://www.worldometers.info/coronavirus/"

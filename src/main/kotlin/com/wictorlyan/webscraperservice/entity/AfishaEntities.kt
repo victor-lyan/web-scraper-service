@@ -79,3 +79,10 @@ class AfishaCinemaMovie(
         return Objects.hash(cinema, movie, movieDate, movieTime)
     }
 }
+
+data class AfishaNewsArticle(
+    var title: String,
+    var link: String,
+    var date: String,
+    var description: String
+)

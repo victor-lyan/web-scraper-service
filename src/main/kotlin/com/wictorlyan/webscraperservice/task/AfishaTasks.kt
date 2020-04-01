@@ -9,7 +9,7 @@ import java.time.LocalDate
 class AfishaMoviesTask(
     val movieService: AfishaMovieService
 ) {
-    @Scheduled(initialDelay = 300, fixedDelay = 3_600_000)
+    /*@Scheduled(initialDelay = 300, fixedDelay = 3_600_000)
     fun dailyScrapingTask() {
         val today = LocalDate.now()
         movieService.doDailyScraping(today)
@@ -20,5 +20,5 @@ class AfishaMoviesTask(
         movieService.doDailyScraping(today.plusDays(5))
         movieService.doDailyScraping(today.plusDays(6))
         movieService.updateMoviesLinksAndImages()
-    }
+    }*/
 }
