@@ -91,7 +91,8 @@ class AfishaScraper(
         val document = Jsoup.connect(url).get()
         
         val newsBlock = document.selectFirst("channel").select("item")
-        newsBlock.forEach {
+        // process first 10 news only
+        newsBlock.take(10).forEach {
             result.add(AfishaNewsArticle(
                 it.selectFirst("title").text(),
                 it.selectFirst("link").text(),

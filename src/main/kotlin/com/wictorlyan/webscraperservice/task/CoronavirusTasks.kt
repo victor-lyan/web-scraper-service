@@ -8,7 +8,10 @@ import org.springframework.stereotype.Component
 class CoronavirusCountryStatsTask(
     val coronavirusService: CoronavirusService
 ) {
-    @Scheduled(initialDelay = 1000, fixedDelay = 1_800_000)
+    @Scheduled(
+        initialDelayString = "\${coronavirus.scheduledTaskInitialDelay}", 
+        fixedDelayString = "\${coronavirus.scheduledTaskFixedDelay}"
+    )
     fun countryStatsTask() {
         coronavirusService.doCountryStatsScraping()
     }

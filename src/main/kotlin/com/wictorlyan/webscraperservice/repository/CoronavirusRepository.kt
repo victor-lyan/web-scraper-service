@@ -18,16 +18,15 @@ class CoronavirusRepository(
             INSERT INTO $TABLE_CORONA_COUNTRY_STATS ($COLUMN_COUNTRY,$COLUMN_TOTAL_CASES,
             $COLUMN_NEW_CASES,$COLUMN_TOTAL_DEATHS,$COLUMN_NEW_DEATHS,$COLUMN_TOTAL_RECOVERED,
             $COLUMN_ACTIVE_CASES,$COLUMN_SERIOUS_CASES,$COLUMN_TOTAL_CASES_BY_MILLION,
-            $COLUMN_DEATHS_BY_MILLION,$COLUMN_FIRST_CASE_DATE) VALUES (?,?,?,?,?,?,?,?,?,?,?) 
+            $COLUMN_DEATHS_BY_MILLION) VALUES (?,?,?,?,?,?,?,?,?,?) 
             ON CONFLICT ($COLUMN_COUNTRY) DO UPDATE SET
             ($COLUMN_TOTAL_CASES,$COLUMN_NEW_CASES,$COLUMN_TOTAL_DEATHS,$COLUMN_NEW_DEATHS,
             $COLUMN_TOTAL_RECOVERED,$COLUMN_ACTIVE_CASES,$COLUMN_SERIOUS_CASES,
-            $COLUMN_TOTAL_CASES_BY_MILLION,$COLUMN_DEATHS_BY_MILLION,$COLUMN_FIRST_CASE_DATE,
+            $COLUMN_TOTAL_CASES_BY_MILLION,$COLUMN_DEATHS_BY_MILLION,
             $COLUMN_MODIFIED_DATE) = (EXCLUDED.$COLUMN_TOTAL_CASES,EXCLUDED.$COLUMN_NEW_CASES,
             EXCLUDED.$COLUMN_TOTAL_DEATHS,EXCLUDED.$COLUMN_NEW_DEATHS,EXCLUDED.$COLUMN_TOTAL_RECOVERED,
             EXCLUDED.$COLUMN_ACTIVE_CASES,EXCLUDED.$COLUMN_SERIOUS_CASES,
-            EXCLUDED.$COLUMN_TOTAL_CASES_BY_MILLION,EXCLUDED.$COLUMN_DEATHS_BY_MILLION,
-            EXCLUDED.$COLUMN_FIRST_CASE_DATE,NOW())
+            EXCLUDED.$COLUMN_TOTAL_CASES_BY_MILLION,EXCLUDED.$COLUMN_DEATHS_BY_MILLION,NOW())
             """.trimIndent(),
             CoronavirusCountrySetter(countryStats)
         )
@@ -44,4 +43,16 @@ class CoronavirusRepository(
             null
         }
     }
+    
+    /*fun getDataForAllCountries(): CoronavirusCountryStats? {
+        return try {
+            jdbcTemplate.queryForObject(
+                "SELECT * FROM $TABLE_CORONA_COUNTRY_STATS WHERE LOWER($COLUMN_COUNTRY) = ?",
+                arrayOf(country.toLowerCase()),
+                CoronavirusCountryStatsRowMapper()
+            )
+        } catch (e: EmptyResultDataAccessException) {
+            null
+        }
+    }*/
 }

@@ -56,8 +56,7 @@ val jar: Jar by tasks
 tasks.create("createDockerfile", Dockerfile::class) {
 	from("openjdk:8-jre-alpine")
 	copyFile(jar.archiveFileName.get(), "/app/web-scraper-service.jar")
-	entryPoint("java")
-	defaultCommand("-jar", "/app/web-scraper-service.jar", "-Dspring.profiles.active=production")
+	entryPoint("java", "-Dspring.profiles.active=production", "-jar", "/app/web-scraper-service.jar")
 	exposePort(9096)
 }
 
@@ -68,16 +67,21 @@ tasks.create("syncJar", Copy::class) {
 }
 
 tasks.create("removeOldImage", DockerRemoveImage::class) {
-	targetImageId("wictor-lyan/web-scraper-service")
+	force.set(true)
+	targetImageId("wictorlyan/web-scraper-service")
 	onError {println(message)}
 }
 
 tasks.create("buildDockerImage", DockerBuildImage::class) {
 	dependsOn("removeOldImage", "syncJar", "createDockerfile")
-	images.add("wictor-lyan/web-scraper-service:latest")
+	images.add("wictorlyan/web-scraper-service:latest")
 }
 
 tasks.create("pushDockerImage", DockerPushImage::class) {
 	dependsOn("buildDockerImage")
-	
+	images.add("wictorlyan/web-scraper-service:latest")
+	registryCredentials {
+		username.set(project.property("dockerHubUser") as String)
+		password.set(project.property("dockerHubPassword") as String)
+	}
 }

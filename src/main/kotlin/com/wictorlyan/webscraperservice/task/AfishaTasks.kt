@@ -9,7 +9,10 @@ import java.time.LocalDate
 class AfishaMoviesTask(
     val movieService: AfishaMovieService
 ) {
-    /*@Scheduled(initialDelay = 300, fixedDelay = 3_600_000)
+    /*@Scheduled(
+        initialDelayString = "\${afisha.scheduledTaskInitialDelay}", 
+        fixedDelayString = "\${afisha.scheduledTaskFixedDelay}"
+    )
     fun dailyScrapingTask() {
         val today = LocalDate.now()
         movieService.doDailyScraping(today)

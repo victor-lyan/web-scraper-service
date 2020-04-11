@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS corona_country_stats (
 	"serious_cases" int4 NOT NULL DEFAULT 0,
 	"total_cases_by_million" numeric(10,2) NOT NULL DEFAULT 0.0,
 	"deaths_by_million" numeric(10,2) NOT NULL DEFAULT 0.0,
-	"first_case_date" varchar(50) NOT NULL,
+	"first_case_date" varchar(50) NULL,
 	"created_date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"modified_date" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

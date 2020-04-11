@@ -21,7 +21,6 @@ class CoronavirusCountrySetter(
         ps.setInt(8, countryStats[i].seriousCases)
         ps.setDouble(9, countryStats[i].totalCasesByMillion)
         ps.setDouble(10, countryStats[i].deathsByMillion)
-        ps.setString(11, countryStats[i].firstCaseDate)
     }
 
     override fun getBatchSize(): Int {

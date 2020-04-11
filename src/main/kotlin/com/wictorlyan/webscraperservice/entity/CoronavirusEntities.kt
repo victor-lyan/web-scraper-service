@@ -11,5 +11,5 @@ data class CoronavirusCountryStats(
     var seriousCases: Int = 0,
     var totalCasesByMillion: Double = 0.0,
     var deathsByMillion: Double = 0.0,
-    var firstCaseDate: String = ""
+    var firstCaseDate: String? = ""
 ) : BaseEntity()

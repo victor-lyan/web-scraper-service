@@ -21,7 +21,11 @@ afisha:
     baseUrl: "https://www.gazeta.uz/ru/rss/?section=coronavirus"
   baseUrl: "https://www.afisha.uz"
   baseUrlGazeta: "https://www.gazeta.uz"
+  scheduledTaskInitialDelay: "10000"
+  scheduledTaskFixedDelay: "3600000"
   
 coronavirus:
   globalStats:
     baseUrl: "https://www.worldometers.info/coronavirus/"
+  scheduledTaskInitialDelay: "20000"
+  scheduledTaskFixedDelay: "600000"
